@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 
@@ -16,6 +17,7 @@ public class GraphicElement extends JPanel {
     
     protected void paintComponent(Graphics g) {    	
         super.paintComponent(g);
+        g.setColor(Color.orange);
         g.fillRect(0, 0, 30, 30);
         g.drawRect(0, 0, 30, 30);
     }
