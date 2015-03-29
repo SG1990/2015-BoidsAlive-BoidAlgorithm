@@ -1,8 +1,8 @@
 
 public abstract class WorldObject extends Thread {
 	 
-	protected int x;
-	protected int y;
+	private int x;
+	private int y;
 	public GraphicElement graphicEle ;
 	
 	public int getX() { return x; }	
