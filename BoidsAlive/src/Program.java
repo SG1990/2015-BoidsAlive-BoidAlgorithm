@@ -23,10 +23,12 @@ public class Program {
         world.createBoid();
         
 		//make boids move
-//		while(true){
-//			//adjust all behaviours
-//		}
-			
+		while(true){
+			//adjust all behaviours
+			for(Boid b : world.boids){
+				b.move(0, -2);
+			}
+		}
 	}
 
 }
