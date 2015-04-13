@@ -12,7 +12,7 @@ public class Program {
 		//initialise world
 		//show world
 		JFrame f = new JFrame();
-        f.setSize(800,600);
+        f.setSize(world.getBoundsX(),world.getBoundsY());
         f.setTitle("Boids Alive");
         f.setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
         f.getContentPane().add(world);    

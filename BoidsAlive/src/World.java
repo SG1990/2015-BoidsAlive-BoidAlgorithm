@@ -10,6 +10,9 @@ public final class World extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private Random r = new Random();
 	
+	private static final int boundsX = 800;
+	private static final int boundsY = 600;
+	
 	public ArrayList<Boid> boids = new ArrayList<Boid>();
 	public ArrayList<Obstacle> obstacles = new ArrayList<Obstacle>();
 	
@@ -24,6 +27,9 @@ public final class World extends JPanel {
 		
 		return instance;
 	}
+	
+	public int getBoundsX() { return boundsX; }
+	public int getBoundsY() { return boundsY; }
 	
 	public void createBoid(){
 		Boid b = new Boid() ;
