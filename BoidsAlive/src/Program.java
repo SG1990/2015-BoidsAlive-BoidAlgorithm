@@ -9,8 +9,7 @@ public class Program {
 	public static void main(String[] args) {
 		World world = World.getInstance();
 		
-		//initialise world
-		//show world
+		// Initialise and show world
 		JFrame f = new JFrame();
         f.setSize(world.getBoundsX(),world.getBoundsY());
         f.setTitle("Boids Alive");
@@ -19,15 +18,23 @@ public class Program {
         f.setResizable(false);
         f.setVisible(true);
 		
-        world.createBoid();
-        world.createBoid();
-        
-		//make boids move
+        for(int i = 0 ; i < 10; i++) 
+        	world.createBoid();        
+		
 		while(true){
 			//adjust all behaviours
 			for(Boid b : world.boids){
 				b.move(0, -2);
 			}
+			
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			world.refreshAll();
 		}
 	}
 

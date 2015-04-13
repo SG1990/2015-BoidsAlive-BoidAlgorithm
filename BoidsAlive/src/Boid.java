@@ -14,17 +14,14 @@ public class Boid extends WorldObject{
 		this.x += x;
 		this.y += y;
 		
-		checkBounds();
-		graphicEle.refreshLocation();
-		
+		checkBounds();		
 		try {
 			sleep(15);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		World world = World.getInstance() ;
-		world.repaint();
+		//graphicEle.refreshLocation();
 	}
 
 	private void checkBounds() {

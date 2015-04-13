@@ -36,19 +36,16 @@ public final class World extends JPanel {
         b.setX(r.nextInt(790));
         b.setY(r.nextInt(590));
 
-        boids.add(b);           
-        b.start() ;
-        //b.graphicEle.refreshLocation();
-        //return b;
+        boids.add(b);  
+        b.start() ;          
 	}
 	
 	@Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        paintAll();
     }
 
-	private void paintAll() {
+	public void refreshAll() {
 		for(Boid b : boids) {
 			b.graphicEle.refreshLocation();
 		}		
