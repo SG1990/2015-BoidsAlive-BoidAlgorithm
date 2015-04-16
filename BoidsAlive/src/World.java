@@ -1,11 +1,15 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Random;
+
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 
-public final class World extends JPanel {
+public final class World extends JPanel implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 	private Random r = new Random();
@@ -19,6 +23,9 @@ public final class World extends JPanel {
 	private static World instance = null;	
 	private World() {
 		this.setBackground(Color.white);
+		
+		Timer timer = new Timer(1000/60, this);
+        timer.start();
 	}
 	
 	public static World getInstance(){
@@ -33,8 +40,8 @@ public final class World extends JPanel {
 	
 	public void createBoid(){
 		Boid b = new Boid() ;
-        b.setX(r.nextInt(790));
-        b.setY(r.nextInt(590));
+        b.setX(r.nextInt(800));
+        b.setY(r.nextInt(580));
 
         boids.add(b);  
         b.start() ;          
@@ -43,11 +50,20 @@ public final class World extends JPanel {
 	@Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        
+        paintBoids(g);
     }
 
-	public void refreshAll() {
-		for(Boid b : boids) {
-			b.graphicEle.refreshLocation();
-		}		
+	private void paintBoids(Graphics g) {
+		for(Boid b : boids)
+			b.draw(g);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		for(Boid b : boids)
+			b.move(0, -1);	
+		
+		repaint();
 	}	
 }

@@ -1,4 +1,5 @@
 import javax.swing.JFrame;
+import javax.swing.Timer;
 
 
 public class Program {
@@ -18,24 +19,8 @@ public class Program {
         f.setResizable(false);
         f.setVisible(true);
 		
-        for(int i = 0 ; i < 10; i++) 
-        	world.createBoid();        
-		
-		while(true){
-			//adjust all behaviours
-			for(Boid b : world.boids){
-				b.move(0, -2);
-			}
-			
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			world.refreshAll();
-		}
+        for(int i = 0 ; i < 100; i++) 
+        	world.createBoid();   
 	}
 
 }
