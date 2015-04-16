@@ -1,7 +1,7 @@
 import java.awt.Graphics;
 
 
-public abstract class WorldObject extends Thread {
+public abstract class WorldObject {
 	 
 	protected int x;
 	protected int y;

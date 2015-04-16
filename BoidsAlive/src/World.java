@@ -43,14 +43,12 @@ public final class World extends JPanel implements ActionListener {
         b.setX(r.nextInt(800));
         b.setY(r.nextInt(580));
 
-        boids.add(b);  
-        b.start() ;          
+        boids.add(b);       
 	}
 	
 	@Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        
         paintBoids(g);
     }
 
