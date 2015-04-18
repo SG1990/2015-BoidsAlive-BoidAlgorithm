@@ -40,8 +40,9 @@ public final class World extends JPanel implements ActionListener {
 	
 	public void createBoid(){
 		Boid b = new Boid() ;
-        b.setX(r.nextInt(800));
-        b.setY(r.nextInt(580));
+        b.setPosition(r.nextInt(780), r.nextInt(580));
+        b.setX(r.nextInt(780));
+        b.setY(r.nextInt(580));       
 
         boids.add(b);       
 	}
@@ -60,7 +61,7 @@ public final class World extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		for(Boid b : boids)
-			b.move(0, -1);	
+			b.move();	
 		
 		repaint();
 	}	
