@@ -40,7 +40,6 @@ public final class World extends JPanel implements ActionListener {
 	
 	public void createBoid(){
 		Boid b = new Boid() ;
-        b.setPosition(r.nextInt(780), r.nextInt(580));
         b.setX(r.nextInt(780));
         b.setY(r.nextInt(580));       
 

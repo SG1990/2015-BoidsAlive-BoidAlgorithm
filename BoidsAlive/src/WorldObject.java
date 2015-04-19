@@ -3,12 +3,7 @@ import java.awt.Point;
 
 
 public abstract class WorldObject {
-	 
-	protected Point position = new Point();
 	protected double x, y;
-	
-	public Point getPosition() { return position; }	
-    public void setPosition(int x, int y) { position.setLocation(x, y); }
     
     public double getX() { return x; }
     public void setX(double x) { this.x = x; }

@@ -10,7 +10,8 @@ public class Boid extends WorldObject {
 	
 	private final int size = 20;
 	private final double radius = 50 ;
-	private final double angle = 150;
+	private final double angle = 120;
+	private final double distance = 20;
 	private double vx, vy;
 	
 	public double getVX() { return vx; }
@@ -19,8 +20,8 @@ public class Boid extends WorldObject {
 	public void setVY(double vy) { this.vy = vy; }
 	
 	public Boid() { 
-		vx = 0;
-		vy = -1;
+		vx = 0.5;
+		vy = 0.5;
 	}
 	
 	public void move() {		
@@ -31,14 +32,17 @@ public class Boid extends WorldObject {
 		ArrayList<Boid> neighbours = getNeighbours();
 		
 		//get centre of mass
-		getMassCentre(neighbours);
+		double[] c = getMassCentre(neighbours);
 		
-		v1 = flyTowardsTheCentre();
-		v2 = keepDistance();
-		v3 = matchVelocity();
+		v1 = flyTowardsTheCentre(c);
+		v2 = keepDistance(neighbours);
+		v3 = matchVelocity(neighbours);
 		
-		x += vx;
-		y += vy;
+		vx = 0.5 + v1[0] + v2[0] + v3[0];
+		vy = 0.5 + v1[1] + v2[1] + v3[1];
+		
+		x = x + vx;
+		y = y + vy;
 		
 		checkBounds();
 	}
@@ -64,24 +68,69 @@ public class Boid extends WorldObject {
 		return neighbours;
 	}
 	
-	private void getMassCentre(ArrayList<Boid> neighbours) { // TODO
-		// TODO Auto-generated method stub
+	private double[] getMassCentre(ArrayList<Boid> neighbours) {
+		double[] c = new double[2];
+		c[0] = 0;
+		c[1] = 0;
 		
+		for(Boid n : neighbours){
+			c[0] += n.getX();
+			c[1] += n.getY();
+		}
+		
+		if(neighbours.size() > 0) {
+			c[0] = c[0] / neighbours.size();
+			c[1] = c[1] / neighbours.size();
+		}
+		
+		return c;	
 	}
 
-	private double[] matchVelocity() {		//TODO
-		// TODO Auto-generated method stub
-		return null;
+	private double[] matchVelocity(ArrayList<Boid> neighbours) {		//TODO
+		double[] v3 = new double[2];
+		v3[0] = 0;
+		v3[1] = 0;
+		
+		for(Boid n : neighbours) {
+			if(Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2)) <= distance){
+				v3[0] += n.getVX();
+				v3[1] += n.getVY();
+			}
+		}
+		
+		if(neighbours.size() > 0) {
+			v3[0] = v3[0] / neighbours.size();
+			v3[1] = v3[1] / neighbours.size();
+		}
+		
+		v3[0] = v3[0] / 8;
+		v3[1] = v3[1] / 8;
+		
+		return v3;
 	}
 
-	private double[] keepDistance() {	//TODO
-		// TODO Auto-generated method stub
-		return null;
+	private double[] keepDistance(ArrayList<Boid> neighbours) {	//TODO
+		double[] v2 = new double[2];
+		v2[0] = 0;
+		v2[1] = 0;
+		
+		for(Boid n : neighbours) {
+			if(Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2)) <= distance){
+				v2[0] -= (n.getX() - this.getX());
+				v2[1] -= (n.getY() - this.getY());
+			}
+		}
+		
+		return v2;
 	}
 
-	private double[] flyTowardsTheCentre() {	//TODO
-		// TODO Auto-generated method stub
-		return null;
+	private double[] flyTowardsTheCentre(double[] c) {	//TODO
+		double[] v1 = new double[2];
+		
+		v1[0] = c[0] * 0.01;
+		v1[1] = c[1] * 0.01;
+		
+		return v1;
 	}
 	
 	private void checkBounds() {
