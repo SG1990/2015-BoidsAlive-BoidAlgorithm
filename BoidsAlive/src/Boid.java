@@ -11,13 +11,17 @@ public class Boid extends WorldObject {
 	private final int size = 20;
 	private final double radius = 50 ;
 	private final double angle = 120;
-	private final double distance = 20;
+	private final double minDistance = 20;
+	private final double maxVelocity = 4;
 	private double vx, vy;
 	
 	public double getVX() { return vx; }
 	public void setVX(double vx) { this.vx = vx; }
+	
 	public double getVY() { return vy; }
 	public void setVY(double vy) { this.vy = vy; }
+	
+	public double getSize() { return size; }
 	
 	public Boid() { 
 		vx = 0.5;
@@ -31,30 +35,28 @@ public class Boid extends WorldObject {
 		//get neighbours		
 		ArrayList<Boid> neighbours = getNeighbours();
 		
-		//get centre of mass
-		double[] c = getMassCentre(neighbours);
-		
-		v1 = flyTowardsTheCentre(c);
+		v1 = matchVelocity(neighbours); 
 		v2 = keepDistance(neighbours);
-		v3 = matchVelocity(neighbours);
+		v3 = flyTowardsTheCentre(neighbours);
 		
-		vx = 0.5 + v1[0] + v2[0] + v3[0];
-		vy = 0.5 + v1[1] + v2[1] + v3[1];
+		vx = vx + v1[0] + v2[0] + v3[0];
+		vy = vy + v1[1] + v2[1] + v3[1];
 		
 		x = x + vx;
 		y = y + vy;
 		
+		//checkVelocity();
 		checkBounds();
 	}
 
-	private ArrayList<Boid> getNeighbours() { // TODO
+	private ArrayList<Boid> getNeighbours() {
 		World world = World.getInstance();
 		ArrayList<Boid> neighbours = new ArrayList<Boid>();
 		
 		for(Boid n : world.boids)
 		{
 			//check if in range
-			if(Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2)) <= radius) // watch out for sign on y!!! Test!!!
+			if(Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2)) <= radius)
 			{
 				//check if in angle
 				double a1 = Math.atan(this.getVY()/this.getVX()); // watch out for 0s!!!
@@ -67,70 +69,72 @@ public class Boid extends WorldObject {
 		
 		return neighbours;
 	}
-	
-	private double[] getMassCentre(ArrayList<Boid> neighbours) {
-		double[] c = new double[2];
-		c[0] = 0;
-		c[1] = 0;
-		
-		for(Boid n : neighbours){
-			c[0] += n.getX();
-			c[1] += n.getY();
-		}
-		
-		if(neighbours.size() > 0) {
-			c[0] = c[0] / neighbours.size();
-			c[1] = c[1] / neighbours.size();
-		}
-		
-		return c;	
-	}
 
-	private double[] matchVelocity(ArrayList<Boid> neighbours) {		//TODO
-		double[] v3 = new double[2];
-		v3[0] = 0;
-		v3[1] = 0;
+	private double[] matchVelocity(ArrayList<Boid> neighbours) {
+		double[] v1 = new double[2];
+		v1[0] = 0;
+		v1[1] = 0;
 		
 		for(Boid n : neighbours) {
-			if(Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2)) <= distance){
-				v3[0] += n.getVX();
-				v3[1] += n.getVY();
-			}
-		}
+			v1[0] += n.getVX();
+			v1[1] += n.getVY();
+		}		
 		
 		if(neighbours.size() > 0) {
-			v3[0] = v3[0] / neighbours.size();
-			v3[1] = v3[1] / neighbours.size();
+			v1[0] = v1[0] / neighbours.size();
+			v1[1] = v1[1] / neighbours.size();
 		}
 		
-		v3[0] = v3[0] / 8;
-		v3[1] = v3[1] / 8;
+		v1[0] = (v1[0] - vx) * 0.05;
+		v1[1] = (v1[1] - vy) * 0.05;
 		
-		return v3;
+		return v1;
 	}
 
-	private double[] keepDistance(ArrayList<Boid> neighbours) {	//TODO
+	private double[] keepDistance(ArrayList<Boid> neighbours) {	
 		double[] v2 = new double[2];
 		v2[0] = 0;
 		v2[1] = 0;
 		
 		for(Boid n : neighbours) {
-			if(Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2)) <= distance){
-				v2[0] -= (n.getX() - this.getX());
-				v2[1] -= (n.getY() - this.getY());
+			double d = Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2));
+			if(d <= minDistance){
+				double xDiff = n.getX() - this.getX();
+				double yDiff = n.getY() - this.getY();
+				
+				v2[0] -= ((((xDiff * minDistance) / d) - xDiff) * 0.05);
+				v2[1] -= ((((yDiff * minDistance) / d) - yDiff) * 0.05);
 			}
 		}
 		
 		return v2;
 	}
 
-	private double[] flyTowardsTheCentre(double[] c) {	//TODO
-		double[] v1 = new double[2];
+	private double[] flyTowardsTheCentre(ArrayList<Boid> neighbours) {	
+		double avgD = 0;
+		double[] v3 = new double[2];
+		v3[0] = 0;
+		v3[1] = 0;
 		
-		v1[0] = c[0] * 0.01;
-		v1[1] = c[1] * 0.01;
+		for(Boid n : neighbours) {
+			avgD = avgD + Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2));
+		}
 		
-		return v1;
+		if(neighbours.size() > 0)
+			avgD = avgD / neighbours.size();
+		
+		for(Boid n : neighbours) {
+			double d = Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2));
+			v3[0] += ((((n.getX() - this.getX())*(d - avgD))/d) * 0.05); 
+			v3[1] += ((((n.getY() - this.getY())*(d - avgD))/d) * 0.05); 
+		}
+		
+		return v3;		
+	}
+	
+	private void checkVelocity() {
+		if(vx > maxVelocity) vx *= 0.7;
+		if(vy > maxVelocity) vy *= 0.7;		
 	}
 	
 	private void checkBounds() {

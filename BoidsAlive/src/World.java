@@ -40,8 +40,8 @@ public final class World extends JPanel implements ActionListener {
 	
 	public void createBoid(){
 		Boid b = new Boid() ;
-        b.setX(r.nextInt(780));
-        b.setY(r.nextInt(580));       
+        b.setX(r.nextInt(getBoundsX() - 20));
+        b.setY(r.nextInt(getBoundsY() - 20));       
 
         boids.add(b);       
 	}
