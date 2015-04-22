@@ -8,10 +8,10 @@ import java.util.ArrayList;
 
 public class Boid extends WorldObject {
 	
-	private final int size = 20;
-	private final double radius = 50 ;
+	private final int size = 14;			//20
+	private final double radius = 50 ;		//50
 	private final double angle = 120;
-	private final double minDistance = 20;
+	private final double minDistance = 14;	//20
 	private final double maxVelocity = 4;
 	private double vx, vy;
 	
@@ -30,7 +30,7 @@ public class Boid extends WorldObject {
 	
 	public void move() {		
 		//Apply Boid rules
-		double[] v1, v2, v3;
+		double[] v1, v2, v3, v4;
 		
 		//get neighbours		
 		ArrayList<Boid> neighbours = getNeighbours();
@@ -38,17 +38,18 @@ public class Boid extends WorldObject {
 		v1 = matchVelocity(neighbours); 
 		v2 = keepDistance(neighbours);
 		v3 = flyTowardsTheCentre(neighbours);
+		v4 = addNoise();
 		
-		vx = vx + v1[0] + v2[0] + v3[0];
-		vy = vy + v1[1] + v2[1] + v3[1];
+		vx = vx + v1[0] + v2[0] + v3[0] + v4[0];
+		vy = vy + v1[1] + v2[1] + v3[1] + v4[1];
 		
 		x = x + vx;
 		y = y + vy;
 		
-		//checkVelocity();
+		checkVelocity();
 		checkBounds();
 	}
-
+	
 	private ArrayList<Boid> getNeighbours() {
 		World world = World.getInstance();
 		ArrayList<Boid> neighbours = new ArrayList<Boid>();
@@ -85,8 +86,8 @@ public class Boid extends WorldObject {
 			v1[1] = v1[1] / neighbours.size();
 		}
 		
-		v1[0] = (v1[0] - vx) * 0.05;
-		v1[1] = (v1[1] - vy) * 0.05;
+		v1[0] = (v1[0] - vx) * 0.1;
+		v1[1] = (v1[1] - vy) * 0.1;
 		
 		return v1;
 	}
@@ -95,6 +96,14 @@ public class Boid extends WorldObject {
 		double[] v2 = new double[2];
 		v2[0] = 0;
 		v2[1] = 0;
+		double avgD = 0;
+		
+		for(Boid n : neighbours) {
+			avgD = avgD + Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2));
+		}
+		
+		if(neighbours.size() > 0)
+			avgD = avgD / neighbours.size();
 		
 		for(Boid n : neighbours) {
 			double d = Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2));
@@ -102,8 +111,8 @@ public class Boid extends WorldObject {
 				double xDiff = n.getX() - this.getX();
 				double yDiff = n.getY() - this.getY();
 				
-				v2[0] -= ((((xDiff * minDistance) / d) - xDiff) * 0.05);
-				v2[1] -= ((((yDiff * minDistance) / d) - yDiff) * 0.05);
+				v2[0] -= (((xDiff * minDistance) / d) - xDiff) * (0.15 / neighbours.size());
+        		v2[1] -= (((yDiff * minDistance) / d) - yDiff) * (0.15 / neighbours.size());
 			}
 		}
 		
@@ -124,17 +133,37 @@ public class Boid extends WorldObject {
 			avgD = avgD / neighbours.size();
 		
 		for(Boid n : neighbours) {
-			double d = Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2));
-			v3[0] += ((((n.getX() - this.getX())*(d - avgD))/d) * 0.05); 
-			v3[1] += ((((n.getY() - this.getY())*(d - avgD))/d) * 0.05); 
+			double xDiff = n.getX() - this.getX();
+			double yDiff = n.getY() - this.getY();
+			
+			if(Math.abs(xDiff) > minDistance) {
+				double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+				
+				v3[0] += ((xDiff * (d - avgD))/d) * (0.1 / neighbours.size()); 
+				v3[1] += ((yDiff * (d - avgD))/d) * (0.1 / neighbours.size());
+			}
+			 
 		}
 		
 		return v3;		
 	}
 	
+	private double[] addNoise() {
+		double[] v4 = new double[2];
+		v4[0] = 0;
+		v4[1] = 0;
+		
+		v4[0] = ((Math.random() - 0.5) * maxVelocity) * 0.1;
+		v4[1] = ((Math.random() - 0.5) * maxVelocity) * 0.1;
+		
+		return v4;
+	}
+	
 	private void checkVelocity() {
-		if(vx > maxVelocity) vx *= 0.7;
-		if(vy > maxVelocity) vy *= 0.7;		
+		if (Math.sqrt(Math.pow(this.getVX(), 2) + Math.pow(this.getVY (), 2)) > maxVelocity){
+	    	vx *= 0.75;
+			vy *= 0.75;			
+		}
 	}
 	
 	private void checkBounds() {
@@ -155,6 +184,15 @@ public class Boid extends WorldObject {
         triangle.lineTo((size/2) + getX(), 0 + getY());
         triangle.lineTo(size + getX(), size + getY());        
         triangle.closePath();
+        
+        
+        //rotate
+//        if (vx < 0){
+//   	      g2d.rotate(90.0 + Math.atan(vy/vx)*180.0/Math.PI);
+//        }
+//        else{
+//           g2d.rotate(-90.0 + Math.atan(vy/vx)*180.0/Math.PI);
+//        }
         
         g2d.fill(triangle);
         g2d.dispose();		
