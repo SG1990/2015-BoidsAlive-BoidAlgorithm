@@ -10,7 +10,7 @@ public class Boid extends WorldObject {
 	
 	private final int size = 14;			//20
 	private final double radius = 50 ;		//50
-	private final double angle = 120;
+	private final double angle = 100;		//120
 	private final double minDistance = 14;	//20
 	private final double maxVelocity = 4;
 	private double vx, vy;
@@ -54,24 +54,32 @@ public class Boid extends WorldObject {
 		World world = World.getInstance();
 		ArrayList<Boid> neighbours = new ArrayList<Boid>();
 		
-		for(Boid n : world.boids)
-		{
-			//check if in range
-			if(Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2)) <= radius)
-			{
-				//check if in angle
-				double a1 = Math.atan(this.getVY()/this.getVX()); // watch out for 0s!!!
-				double a2 = Math.atan((n.getY() - this.getY())/(n.getX() - this.getX()));				  // watch out for 0s!!!
-				
-				if(Math.abs(a1 - a2) <= angle)
-					neighbours.add(n);				
-			}
+		for(Boid n : world.boids) {
+			if(n != this) {
+				//check if in range - if distance is less than our radius; get from the readings
+				if(Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2)) <= radius)	{				
+					if(getAngleBetween(n) <= angle)
+						neighbours.add(n);			
+				}
+			}			
 		}
 		
 		return neighbours;
 	}
+	
+	private double getAngleBetween(Boid n) {
+		double[] d = new double[2];
+		d[0] = n.getX() - this.getX();
+		d[1] = n.getY() - this.getY();
+		
+		double vod = (this.getVX() * d[0]) + (this.getVY() * d[1]);
+		double vxd = (Math.sqrt(Math.pow(this.getVX(), 2) + Math.pow(this.getVY(), 2))) * 
+				(Math.sqrt(Math.pow(n.getX(), 2) + Math.pow(n.getY(), 2)));
+		
+		return Math.acos(vod/vxd);
+	}
 
-	private double[] matchVelocity(ArrayList<Boid> neighbours) {
+	private double[] matchVelocity(ArrayList<Boid> neighbours) { //the tricky one, we need to get the speeds somehow
 		double[] v1 = new double[2];
 		v1[0] = 0;
 		v1[1] = 0;
@@ -110,6 +118,9 @@ public class Boid extends WorldObject {
 			if(d <= minDistance){
 				double xDiff = n.getX() - this.getX();
 				double yDiff = n.getY() - this.getY();
+				// calculate angle
+				double a = getAngleBetween(n);
+				
 				
 				v2[0] -= (((xDiff * minDistance) / d) - xDiff) * (0.15 / neighbours.size());
         		v2[1] -= (((yDiff * minDistance) / d) - yDiff) * (0.15 / neighbours.size());
@@ -139,8 +150,8 @@ public class Boid extends WorldObject {
 			if(Math.abs(xDiff) > minDistance) {
 				double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
 				
-				v3[0] += ((xDiff * (d - avgD))/d) * (0.1 / neighbours.size()); 
-				v3[1] += ((yDiff * (d - avgD))/d) * (0.1 / neighbours.size());
+				v3[0] += ((xDiff * (d - avgD))/d) * (0.15 / neighbours.size()); 
+				v3[1] += ((yDiff * (d - avgD))/d) * (0.15 / neighbours.size());
 			}
 			 
 		}
@@ -179,10 +190,10 @@ public class Boid extends WorldObject {
 		Graphics2D g2d = (Graphics2D) g.create(); //TODO Move to boid class
         g2d.setColor(Color.orange);
         
-        Path2D.Double triangle = new Path2D.Double();                
-        triangle.moveTo(0 + getX(), size + getY());
-        triangle.lineTo((size/2) + getX(), 0 + getY());
-        triangle.lineTo(size + getX(), size + getY());        
+        Path2D.Double triangle = new Path2D.Double();  
+        triangle.moveTo(-(size/2) + getX(), size + getY());
+        triangle.lineTo(0 + getX(), 0 + getY());
+        triangle.lineTo((size/2) + getX(), size + getY());  
         triangle.closePath();
         
         
