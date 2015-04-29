@@ -1,7 +1,6 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 
@@ -11,7 +10,7 @@ public class Boid extends WorldObject {
 	private final int size = 14;			//20
 	private final double radius = 50 ;		//50
 	private final double angle = 100;		//120
-	private final double minDistance = 14;	//20
+	private final double minDistance = 20;	//20
 	private final double maxVelocity = 4;
 	private double vx, vy;
 	
@@ -58,7 +57,7 @@ public class Boid extends WorldObject {
 			if(n != this) {
 				//check if in range - if distance is less than our radius; get from the readings
 				if(Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2)) <= radius)	{				
-					if(getAngleBetween(n) <= angle)
+					if(getAngleBetween(this.getVX(), this.getVY(), n.getX() - this.getX(), n.getY() - this.getY()) <= angle)
 						neighbours.add(n);			
 				}
 			}			
@@ -67,14 +66,22 @@ public class Boid extends WorldObject {
 		return neighbours;
 	}
 	
-	private double getAngleBetween(Boid n) {
-		double[] d = new double[2];
-		d[0] = n.getX() - this.getX();
-		d[1] = n.getY() - this.getY();
-		
-		double vod = (this.getVX() * d[0]) + (this.getVY() * d[1]);
-		double vxd = (Math.sqrt(Math.pow(this.getVX(), 2) + Math.pow(this.getVY(), 2))) * 
-				(Math.sqrt(Math.pow(n.getX(), 2) + Math.pow(n.getY(), 2)));
+//	private double getAngleBetween(Boid n) {
+//		double[] d = new double[2];
+//		d[0] = n.getX() - this.getX();
+//		d[1] = n.getY() - this.getY();
+//		
+//		double vod = (this.getVX() * d[0]) + (this.getVY() * d[1]);
+//		double vxd = (Math.sqrt(Math.pow(this.getVX(), 2) + Math.pow(this.getVY(), 2))) * 
+//				(Math.sqrt(Math.pow(d[0], 2) + Math.pow(d[1], 2)));
+//		
+//		return Math.acos(vod/vxd);
+//	}
+	
+	private double getAngleBetween(double x1, double y1, double x2, double y2) {		
+		double vod = (x1 * x2) + (y1 * y2);
+		double vxd = (Math.sqrt(Math.pow(x1, 2) + Math.pow(y1, 2))) * 
+				(Math.sqrt(Math.pow(x2, 2) + Math.pow(y2, 2)));
 		
 		return Math.acos(vod/vxd);
 	}
@@ -104,30 +111,64 @@ public class Boid extends WorldObject {
 		double[] v2 = new double[2];
 		v2[0] = 0;
 		v2[1] = 0;
-		double avgD = 0;
 		
 		for(Boid n : neighbours) {
-			avgD = avgD + Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2));
-		}
-		
-		if(neighbours.size() > 0)
-			avgD = avgD / neighbours.size();
-		
-		for(Boid n : neighbours) {
-			double d = Math.sqrt(Math.pow(n.getX() - this.getX(), 2) + Math.pow(n.getY() - this.getY(), 2));
-			if(d <= minDistance){
-				double xDiff = n.getX() - this.getX();
-				double yDiff = n.getY() - this.getY();
-				// calculate angle
-				double a = getAngleBetween(n);
+			double xDiff = n.getX() - this.getX();
+			double yDiff = n.getY() - this.getY();
+			
+			double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+			if(d <= minDistance){				
+				// calculate angle between
+				double alpha = getDirectedAngleBetween(xDiff, yDiff);
 				
+				//get local change from the angle
+				double localDiffX, localDiffY;
+				if(Math.abs(alpha) < 90) {
+					double beta = 90 - Math.abs(alpha);
+					localDiffX = d * Math.sin(beta);
+					localDiffY = d * Math.sin(Math.abs(alpha));
+				}
+				else {
+					double beta = Math.abs(alpha) - 90;
+					localDiffX = d * Math.cos(beta);
+					localDiffY = d * Math.sin(beta);
+				}
 				
-				v2[0] -= (((xDiff * minDistance) / d) - xDiff) * (0.15 / neighbours.size());
-        		v2[1] -= (((yDiff * minDistance) / d) - yDiff) * (0.15 / neighbours.size());
+				if(alpha < 0) localDiffX = -localDiffX;
+				if(alpha > 90) localDiffY = -localDiffY;
+				
+				v2[0] -= (((localDiffX * minDistance) / d) - localDiffX) * (0.15 / neighbours.size());
+        		v2[1] -= (((localDiffY * minDistance) / d) - localDiffY) * (0.15 / neighbours.size());
+				
+//				v2[0] -= (((xDiff * minDistance) / d) - xDiff) * (0.15 / neighbours.size());
+//        		v2[1] -= (((yDiff * minDistance) / d) - yDiff) * (0.15 / neighbours.size());
 			}
 		}
 		
 		return v2;
+	}
+	
+	private double getDirectedAngleBetween(double xDiff, double yDiff) {
+		double alpha = getAngleBetween(this.getVX(), this.getVY(), xDiff, yDiff);
+		
+		//check direction
+		double ad = getAngleBetween(xDiff, yDiff, 2, 0);
+		double av = getAngleBetween(this.getVX(), this.getVY(), 2, 0);
+		
+		if(this.getVY() >= 0 && yDiff > 0) {
+			if(av < ad) alpha = -alpha;
+		}
+		else if (this.getVY() < 0 && yDiff < 0) {
+			if(av >= ad) alpha = -alpha;
+		}
+		else if (this.getVY() >= 0 && yDiff < 0) {
+			if(av + ad >= 180) alpha = -alpha;
+		}
+		else {
+			if(av + ad < 180) alpha = -alpha;
+		}
+		
+		return alpha;
 	}
 
 	private double[] flyTowardsTheCentre(ArrayList<Boid> neighbours) {	
