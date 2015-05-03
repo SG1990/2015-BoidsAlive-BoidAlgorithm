@@ -1,6 +1,7 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 
@@ -66,18 +67,6 @@ public class Boid extends WorldObject {
 		return neighbours;
 	}
 	
-//	private double getAngleBetween(Boid n) {
-//		double[] d = new double[2];
-//		d[0] = n.getX() - this.getX();
-//		d[1] = n.getY() - this.getY();
-//		
-//		double vod = (this.getVX() * d[0]) + (this.getVY() * d[1]);
-//		double vxd = (Math.sqrt(Math.pow(this.getVX(), 2) + Math.pow(this.getVY(), 2))) * 
-//				(Math.sqrt(Math.pow(d[0], 2) + Math.pow(d[1], 2)));
-//		
-//		return Math.acos(vod/vxd);
-//	}
-	
 	private double getAngleBetween(double x1, double y1, double x2, double y2) {		
 		double vod = (x1 * x2) + (y1 * y2);
 		double vxd = (Math.sqrt(Math.pow(x1, 2) + Math.pow(y1, 2))) * 
@@ -107,7 +96,7 @@ public class Boid extends WorldObject {
 		return v1;
 	}
 
-	private double[] keepDistance(ArrayList<Boid> neighbours) {	
+	private double[] keepDistance2(ArrayList<Boid> neighbours) {	
 		double[] v2 = new double[2];
 		v2[0] = 0;
 		v2[1] = 0;
@@ -170,6 +159,54 @@ public class Boid extends WorldObject {
 		
 		return alpha;
 	}
+	
+	private double[] keepDistance(ArrayList<Boid> neighbours) {	
+		double[] v2 = new double[2];
+		v2[0] = 0;
+		v2[1] = 0;
+		
+		for(Boid n : neighbours) {
+			double xDiff = n.getX() - this.getX();
+			double yDiff = n.getY() - this.getY();
+			
+			double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+			if(d <= minDistance){				
+				
+				
+				v2[0] -= (((xDiff * minDistance) / d) - xDiff) * (0.15 / neighbours.size());
+        		v2[1] -= (((yDiff * minDistance) / d) - yDiff) * (0.15 / neighbours.size());
+			}
+		}
+		
+		return v2;
+	}
+	
+	private double getRotationAngle() {
+		//get angle
+		double avy = getAngleBetween(this.getVX(), this.getVY(), 0, 2);
+		
+		//get its direction
+		if(this.getVX() >= 0) avy = -avy;
+		
+		return avy;
+	}
+	
+	private void systemToLocal(Boid n) {
+		double a = getRotationAngle();
+		
+		double xDiff = n.getX() - this.getX();
+		double yDiff = n.getY() - this.getY();
+		
+		//rotate
+		double rVX = (this.getVX() * Math.cos(a)) - (this.getVY() * Math.sin(a));
+		double rVY = (this.getVX() * Math.sin(a)) - (this.getVY() * Math.cos(a));	
+		double rDX = (xDiff * Math.cos(a)) - (yDiff * Math.sin(a));
+		double rDY = (xDiff * Math.sin(a)) - (yDiff * Math.cos(a));
+		
+		//translate
+		rDX -= this.getX();
+		rDY -= this.getY();
+	}
 
 	private double[] flyTowardsTheCentre(ArrayList<Boid> neighbours) {	
 		double avgD = 0;
@@ -231,22 +268,25 @@ public class Boid extends WorldObject {
 		Graphics2D g2d = (Graphics2D) g.create(); //TODO Move to boid class
         g2d.setColor(Color.orange);
         
-        Path2D.Double triangle = new Path2D.Double();  
-        triangle.moveTo(-(size/2) + getX(), size + getY());
-        triangle.lineTo(0 + getX(), 0 + getY());
-        triangle.lineTo((size/2) + getX(), size + getY());  
-        triangle.closePath();
+        AffineTransform oldTransform = g2d.getTransform();
+        g2d.translate(getX(), getY());
         
+        Path2D.Double triangle = new Path2D.Double();  
+        triangle.moveTo(-(size/2), size);
+        triangle.lineTo(0, 0);
+        triangle.lineTo((size/2), size);  
+        triangle.closePath();        
         
         //rotate
-//        if (vx < 0){
-//   	      g2d.rotate(90.0 + Math.atan(vy/vx)*180.0/Math.PI);
-//        }
-//        else{
-//           g2d.rotate(-90.0 + Math.atan(vy/vx)*180.0/Math.PI);
-//        }
+        if (vx < 0){
+     	      g2d.rotate(Math.toRadians(-90.0 + Math.atan(vy/vx)*180.0/Math.PI));
+        }
+        else {
+             g2d.rotate(Math.toRadians(90.0 + Math.atan(vy/vx)*180.0/Math.PI));
+        }
         
-        g2d.fill(triangle);
+        g2d.fill(triangle);        
+        g2d.setTransform(oldTransform);        
         g2d.dispose();		
 	}
 }
