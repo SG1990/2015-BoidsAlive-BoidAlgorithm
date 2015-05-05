@@ -163,38 +163,38 @@ public class Boid extends WorldObject {
 		return v4;
 	}
 	
-	private double[] getLocalNeighbour(Boid n) {		
-		double xDiff = Math.abs(n.getX() - x);
-		double yDiff = Math.abs(n.getY() - y);
-		double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)); //given
-		
-		//translate neighbour
-		double nX = n.getX() - x;
-		double nY = n.getY() - y;
-		
-		//rotate neighbour
-		double a = getAngleBetween(vx, vy, 0, 2);
-		if (vx >= 0) a = -a;
-		
-		double oldnX = nX;
-		nX = (nX * Math.cos(a)) + (nY * Math.sin(a));	
-		nY = (-oldnX * Math.sin(a)) + (nY * Math.cos(a));
-		
-		//get the angle between neighbour and self
-		double b = getAngleBetween(nX, nY, 0, 2);   //given
-		if (nX >= 0) b = -b;
-		
-		//get the neighbour's coordinates; TODO: from maps!
-		
-				
-		//rotate back
-		a = -a;
-		double[] localCoords = new double[2];
-		localCoords[0] = (nX * Math.cos(a)) + (nY * Math.sin(a));
-		localCoords[1] = (-nX * Math.sin(a)) + (nY * Math.cos(a));
-		
-		return localCoords;
-	}
+//	private double[] getLocalNeighbour(Boid n) {		
+//		double xDiff = Math.abs(n.getX() - x);
+//		double yDiff = Math.abs(n.getY() - y);
+//		double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)); //given
+//		
+//		//translate neighbour
+//		double nX = n.getX() - x;
+//		double nY = n.getY() - y;
+//		
+//		//rotate neighbour
+//		double a = getAngleBetween(vx, vy, 0, 2);
+//		if (vx >= 0) a = -a;
+//		
+//		double oldnX = nX;
+//		nX = (nX * Math.cos(a)) + (nY * Math.sin(a));	
+//		nY = (-oldnX * Math.sin(a)) + (nY * Math.cos(a));
+//		
+//		//get the angle between neighbour and self
+//		double b = getAngleBetween(nX, nY, 0, 2);   //given
+//		if (nX >= 0) b = -b;
+//		
+//		//get the neighbour's coordinates; TODO: from maps!
+//		
+//				
+//		//rotate back
+//		a = -a;
+//		double[] localCoords = new double[2];
+//		localCoords[0] = (nX * Math.cos(a)) + (nY * Math.sin(a));
+//		localCoords[1] = (-nX * Math.sin(a)) + (nY * Math.cos(a));
+//		
+//		return localCoords;
+//	}
 	
 	private double[] toLocal(double[] coords) {		
 		double xDiff = Math.abs(coords[0] - x);
