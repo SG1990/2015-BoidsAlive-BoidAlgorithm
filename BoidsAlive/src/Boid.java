@@ -30,19 +30,19 @@ public class Boid extends WorldObject {
 		vy = r.nextInt(4) - 2;
 	}
 	
-	public void move() {		
-		//Apply Boid rules
-		double[] v1, v2, v3, v4;
-		
+	public void move() {	
 		//get neighbours		
 		ArrayList<Boid> neighbours = getNeighbours();
 		
-		v1 = matchVelocity(neighbours); 
-		v2 = keepDistance(neighbours);
-		v3 = flyTowardsTheCentre(neighbours);
-		v4 = addNoise();
-		
+		//Apply Boid rules
 		if(neighbours.size() != 0){
+			double[] v1, v2, v3, v4;
+			
+			v1 = matchVelocity(neighbours); 
+			v2 = keepDistance(neighbours);
+			v3 = flyTowardsTheCentre(neighbours);
+			v4 = addNoise();
+			
 			vx = vx + v1[0] + v2[0] + v3[0] + v4[0];
 			vy = vy + v1[1] + v2[1] + v3[1] + v4[1];
 		}	
