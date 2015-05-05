@@ -42,16 +42,10 @@ public class Boid extends WorldObject {
 		v3 = flyTowardsTheCentre(neighbours);
 		v4 = addNoise();
 		
-		double oldVX = vx;
-		double oldVY = vy;
-		
-		vx = vx + v1[0] + v2[0] + v3[0] + v4[0];
-		vy = vy + v1[1] + v2[1] + v3[1] + v4[1];
-		
-		if(neighbours.size() == 0){
-			vx = oldVX;
-			vy = oldVY;
-		}
+		if(neighbours.size() != 0){
+			vx = vx + v1[0] + v2[0] + v3[0] + v4[0];
+			vy = vy + v1[1] + v2[1] + v3[1] + v4[1];
+		}	
 		
 		x = x + vx;
 		y = y + vy;
@@ -107,23 +101,18 @@ public class Boid extends WorldObject {
 			double xDiff = n.getX() - x; //to local coords
 			double yDiff = n.getY() - y;
 			
-//			double[] xyDiff = getLocalNeighbour(n);
-			
 			double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
 			if(d <= minDistance){						
 				
 				v2[0] -= (((xDiff * minDistance) / d) - xDiff) * (0.15 / neighbours.size());
         		v2[1] -= (((yDiff * minDistance) / d) - yDiff) * (0.15 / neighbours.size());
-				
-//				v2[0] -= (((xyDiff[0] * minDistance) / d) - xyDiff[0]) * (0.15 / neighbours.size());
-//        		v2[1] -= (((xyDiff[1] * minDistance) / d) - xyDiff[1]) * (0.15 / neighbours.size());
 			}
 		}
 		
 		return v2;
 	}
 
-	private double[] flyTowardsTheCentre(ArrayList<Boid> neighbours) {	//ok!
+	private double[] flyTowardsTheCentre(ArrayList<Boid> neighbours) {
 		double avgD = 0;
 		double[] v3 = new double[2];
 		v3[0] = 0;
@@ -145,8 +134,7 @@ public class Boid extends WorldObject {
 				
 				v3[0] += ((xDiff * (d - avgD))/d) * (0.15 / neighbours.size()); 
 				v3[1] += ((yDiff * (d - avgD))/d) * (0.15 / neighbours.size());
-			}
-			 
+			}			 
 		}
 		
 		return v3;		
@@ -162,102 +150,6 @@ public class Boid extends WorldObject {
 		
 		return v4;
 	}
-	
-//	private double[] getLocalNeighbour(Boid n) {		
-//		double xDiff = Math.abs(n.getX() - x);
-//		double yDiff = Math.abs(n.getY() - y);
-//		double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)); //given
-//		
-//		//translate neighbour
-//		double nX = n.getX() - x;
-//		double nY = n.getY() - y;
-//		
-//		//rotate neighbour
-//		double a = getAngleBetween(vx, vy, 0, 2);
-//		if (vx >= 0) a = -a;
-//		
-//		double oldnX = nX;
-//		nX = (nX * Math.cos(a)) + (nY * Math.sin(a));	
-//		nY = (-oldnX * Math.sin(a)) + (nY * Math.cos(a));
-//		
-//		//get the angle between neighbour and self
-//		double b = getAngleBetween(nX, nY, 0, 2);   //given
-//		if (nX >= 0) b = -b;
-//		
-//		//get the neighbour's coordinates; TODO: from maps!
-//		
-//				
-//		//rotate back
-//		a = -a;
-//		double[] localCoords = new double[2];
-//		localCoords[0] = (nX * Math.cos(a)) + (nY * Math.sin(a));
-//		localCoords[1] = (-nX * Math.sin(a)) + (nY * Math.cos(a));
-//		
-//		return localCoords;
-//	}
-	
-	private double[] toLocal(double[] coords) {		
-		double xDiff = Math.abs(coords[0] - x);
-		double yDiff = Math.abs(coords[1] - y);
-		double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)); //given
-		
-		//translate neighbour
-		double nX = coords[0] - x;
-		double nY = coords[1] - y;
-		
-		//rotate neighbour
-		double a = getAngleBetween(vx, vy, 0, 2);
-		if (vx >= 0) a = -a;
-		
-		double[] localCoords = new double[2];
-		localCoords[0] = (nX * Math.cos(a)) + (nY * Math.sin(a));
-		localCoords[1] = (-nX * Math.sin(a)) + (nY * Math.cos(a));
-		
-		return localCoords;
-	}
-	
-	private double[] toGlobal(double[] coords) {		
-		double xDiff = Math.abs(coords[0] - x);
-		double yDiff = Math.abs(coords[1] - y);
-		double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2)); //given
-		
-		//rotate neighbour
-		double a = getAngleBetween(vx, vy, 0, 2);
-		if (vx < 0) a = -a;
-		
-		double[] localCoords = new double[2];
-		localCoords[0] = (coords[0] * Math.cos(a)) + (coords[1] * Math.sin(a));
-		localCoords[1] = (-coords[0] * Math.sin(a)) + (coords[1] * Math.cos(a));
-		
-		//translate neighbour
-		localCoords[0] += x;
-		localCoords[1] += y;		
-		
-		return localCoords;
-	}
-	
-//	private double getDirectedAngleBetween(double xDiff, double yDiff) {
-//	double alpha = getAngleBetween(vx, vy, xDiff, yDiff);
-//			
-//	//check direction
-//	double ad = getAngleBetween(xDiff, yDiff, 2, 0);
-//	double av = getAngleBetween(vx, vy, 2, 0);
-//	
-//	if(vy >= 0 && yDiff > 0) {
-//		if(av < ad) alpha = -alpha;
-//	}
-//	else if (vy < 0 && yDiff < 0) {
-//		if(av >= ad) alpha = -alpha;
-//	}
-//	else if (vy >= 0 && yDiff < 0) {
-//		if(av + ad >= 180) alpha = -alpha;
-//	}
-//	else {
-//		if(av + ad < 180) alpha = -alpha;
-//	}
-//	
-//	return alpha;
-//}
 	
 	private double getAngleBetween(double x1, double y1, double x2, double y2) {		
 		double aob = (x1 * x2) + (y1 * y2);
