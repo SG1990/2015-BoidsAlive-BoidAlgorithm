@@ -11,7 +11,7 @@ public class Boid extends WorldObject {
 	
 	private final int size = 14;			//20
 	private final double radius = 40 ;		//50
-	private final double angle = 20;		//120
+	private final double angle = 120;		//120
 	private final double minDistance = 20;	//20
 	private final double maxVelocity = 3;
 	private double vx, vy;
@@ -71,7 +71,7 @@ public class Boid extends WorldObject {
 		return neighbours;
 	}	
 
-	private double[] matchVelocity(ArrayList<Boid> neighbours) { //the tricky one, we need to get the speeds somehow
+	private double[] matchVelocity(ArrayList<Boid> neighbours) {
 		double[] v1 = new double[2];
 		v1[0] = 0;
 		v1[1] = 0;
@@ -86,8 +86,8 @@ public class Boid extends WorldObject {
 			v1[1] = v1[1] / neighbours.size();
 		}
 		
-		v1[0] = (v1[0] - vx) * 0.1;
-		v1[1] = (v1[1] - vy) * 0.1;
+		v1[0] = v1[0] * 0.1;
+		v1[1] = v1[1] * 0.1;
 		
 		return v1;
 	}
@@ -98,7 +98,7 @@ public class Boid extends WorldObject {
 		v2[1] = 0;
 		
 		for(Boid n : neighbours) {
-			double xDiff = n.getX() - x; //to local coords
+			double xDiff = n.getX() - x;
 			double yDiff = n.getY() - y;
 			
 			double d = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
@@ -145,8 +145,8 @@ public class Boid extends WorldObject {
 		v4[0] = 0;
 		v4[1] = 0;
 		
-		v4[0] = ((Math.random() - 0.5) * maxVelocity) * 0.1;
-		v4[1] = ((Math.random() - 0.5) * maxVelocity) * 0.1;
+		v4[0] = ((Math.random() - 0.5) * maxVelocity) * 0.05;
+		v4[1] = ((Math.random() - 0.5) * maxVelocity) * 0.05;
 		
 		return v4;
 	}
