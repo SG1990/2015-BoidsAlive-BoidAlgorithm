@@ -14,7 +14,8 @@ public class Boid extends WorldObject {
 	private final double angle = 120;		//120
 	private final double minDistance = 20;	//20
 	private final double maxVelocity = 3;
-	private double vx, vy;
+	double vx;
+	double vy;
 	
 	public double getVX() { return vx; }
 	public void setVX(double vx) { this.vx = vx; }
@@ -23,6 +24,13 @@ public class Boid extends WorldObject {
 	public void setVY(double vy) { this.vy = vy; }
 	
 	public double getSize() { return size; }
+	
+	public double getRadius() { return radius;}
+	
+	private boolean selected = false;
+	public void setSelected(boolean selected){
+		this.selected = selected;
+	}
 	
 	public Boid() {
 		Random r = new Random();
@@ -54,7 +62,7 @@ public class Boid extends WorldObject {
 		checkBounds();
 	}
 	
-	private ArrayList<Boid> getNeighbours() {
+	ArrayList<Boid> getNeighbours() {
 		World world = World.getInstance();
 		ArrayList<Boid> neighbours = new ArrayList<Boid>();
 		
