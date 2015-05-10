@@ -2,6 +2,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.Random;
@@ -207,5 +208,24 @@ public class Boid extends WorldObject {
         g2d.fill(triangle);        
         g2d.setTransform(oldTransform);        
         g2d.dispose();		
+	}
+	
+	public void drawScanArea(Graphics g) {
+		
+		Graphics2D g2d = (Graphics2D) g.create();
+        g2d.setColor(Color.pink);
+        
+        Arc2D.Double arc = new Arc2D.Double(Arc2D.PIE);
+        arc.setArcByCenter(x, y, radius, 
+        		getRotationAngle()-angle, 
+        		angle*2, 
+        		Arc2D.PIE);
+        g2d.draw(arc);
+        
+        g2d.dispose();	
+		
+	}
+	private double getRotationAngle() {
+		return (double) 360-Math.toDegrees(Math.atan2(vy,vx));
 	}
 }
